@@ -1,5 +1,11 @@
 const path = require('path');
+const fs = require('fs');
 const http = require('http');
+const https = require('https');
+const privateKey  = fs.readFileSync('privkey.pem', 'utf8');
+const certificate = fs.readFileSync('fullchain.pem', 'utf8');
+
+const credentials = {key: privateKey, cert: certificate};
 const express = require('express');
 const socketio = require('socket.io');
 const formatMessage = require('./utils/messages');
@@ -11,13 +17,13 @@ const {
 } = require('./utils/users');
 
 const app = express();
-const server = http.createServer(app);
+const server = https.createServer(credentials, app);
 const io = socketio(server);
 
 // Set static folder
 app.use(express.static(path.join(__dirname, 'public')));
 
-const botName = 'ChatCord Bot';
+const botName = 'TourChat Bot ';
 
 // Run when client connects
 io.on('connection', socket => {
@@ -27,7 +33,7 @@ io.on('connection', socket => {
     socket.join(user.room);
 
     // Welcome current user
-    socket.emit('message', formatMessage(botName, 'Welcome to ChatCord!'));
+    socket.emit('message', formatMessage(botName, 'Welcome to TourChat!'));
 
     // Broadcast when a user connects
     socket.broadcast
